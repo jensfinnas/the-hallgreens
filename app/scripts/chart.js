@@ -34,7 +34,7 @@ function initChart(nodeData, edgeData) {
   var years = nodeData
     .map(function(d) { return d["Födelseår"] })
     .filter(function(d) { return d > 0; });
-    
+
   yearScale.domain([d3.min(years), d3.max(years)])
 
   root = nodeData[0];
@@ -86,7 +86,7 @@ function update(source) {
 
     var nodeSize = 36;
 
-    nodeEnter.append("rect")
+    /*nodeEnter.append("rect")
 	     .attr("x", - nodeSize / 2)
       	.attr("y", - nodeSize / 2)
         .attr("width", nodeSize)
@@ -95,10 +95,17 @@ function update(source) {
         .attr("stroke", "red")
         .attr("stroke-width", function(d) {
         	return d["Lingarödelägare"] ? "3px" : "0";
-        });
+        });*/
 
     nodeEnter.append("image")
-      .attr("xlink:href", "images/hugo.png")
+      .attr("xlink:href", function(d) {
+        if (d["ImageUrl"] == "") {
+          return "images/placeholder.png";
+        }
+        else {
+          return d["ImageUrl"];
+        }
+      })
       .attr("x", - nodeSize / 2)
       .attr("y", - nodeSize / 2)
       .attr("width", nodeSize)
@@ -119,9 +126,10 @@ function update(source) {
         .duration(duration)
         .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
 
-    nodeUpdate.select("circle")
+    /*nodeUpdate.select("circle")
         .attr("r", 10)
         .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
+    */
 
     nodeUpdate.select("text")
         .style("fill-opacity", 1);
