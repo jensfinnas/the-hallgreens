@@ -33,6 +33,7 @@ function prepareData(nodeData, edgeData) {
 	  d["Födelseår"] = +d["Födelseår"];
 	  d["Lingarödelägare"] = d["Lingarödelägare"] == "TRUE";
 	  d["Nu levande"] = d["Nu levande"] == "TRUE";
+	  d["hasPartner"] = d["Partner"] !== "";
 	})
 
 	persons = nodeData.reduce(function(map, node) {

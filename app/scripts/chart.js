@@ -84,7 +84,7 @@ function update(source) {
         .attr("r", 1e-6)
         .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
 
-    var nodeSize = 36;
+    var nodeSize = 20;
 
     /*nodeEnter.append("rect")
 	     .attr("x", - nodeSize / 2)
@@ -97,13 +97,34 @@ function update(source) {
         	return d["Lingarödelägare"] ? "3px" : "0";
         });*/
 
+    // Partner node
+    var partnerNodeSize = 10;
+    var partnerGroup = nodeEnter.append("g")
+      .attr("class", "partner")
+      .classed("no-partner", function(d) { return !d["hasPartner"]; })
+      .attr("transform", "translate("+ [0, nodeSize] +")")
+
+    partnerGroup.append("circle")
+       .attr("x", - nodeSize / 2)
+       .attr("y", (nodeSize / 2 + partnerNodeSize / 2) * 0.8)
+       .attr("r", partnerNodeSize / 2)
+       .attr("fill", "red");
+
+    partnerGroup.append("text")
+      .attr("x", function(d,i) { return d.depth == 0 ? -10 : 10; })
+      .attr("dy", ".35em")
+      .attr("text-anchor", function(d,i) { return d.depth == 0 ? "end" : "start"; })
+      .attr("class", "name partner")
+      .text(function(d) { return d["Partner"]; })
+
     nodeEnter.append("image")
       .attr("xlink:href", function(d) {
         if (d["ImageUrl"] == "") {
           return "images/placeholder.png";
         }
         else {
-          return d["ImageUrl"];
+          return "images/placeholder.png";
+          //return d["ImageUrl"];
         }
       })
       .attr("x", - nodeSize / 2)
@@ -113,9 +134,12 @@ function update(source) {
       .attr("class", "portrait");
 
     nodeEnter.append("text")
-        .attr("x", function(d) { return d.children || d._children ? -10 : 10; })
+        //.attr("x", function(d) { return d.children || d._children ? -10 : 10; })
+        .attr("x", function(d,i) { return d.depth == 0 ? -10 : 10; })
         .attr("dy", ".35em")
-        .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
+        .attr("text-anchor", function(d,i) { return d.depth == 0 ? "end" : "start"; })
+        //.attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
+        .attr("class", "name person")
         .text(function(d) { 
         	return d["Person"] + " ("  + d["Födelseår"] + ")"; 
         })
@@ -131,7 +155,7 @@ function update(source) {
         .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
     */
 
-    nodeUpdate.select("text")
+    nodeUpdate.selectAll(".name")
         .style("fill-opacity", 1);
 
     // Transition exiting nodes to the parent's new position.

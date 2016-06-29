@@ -1,0 +1,32 @@
+.node {
+  cursor: pointer;
+}
+
+/*.node circle {
+  fill: #fff;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}*/
+
+.node text {
+  font: 12px sans-serif;
+}
+
+.link {
+  fill: none;
+  stroke: #ccc;
+  stroke-width: 1.5px;
+}
+
+.node .portrait {
+  //opacity: 0.5;
+}
+.node.alive .portrait {
+  opacity: 1;
+}
+
+.node .partner.no-partner {
+	rect, circle, path, line {
+		display: none;
+	}
+}
