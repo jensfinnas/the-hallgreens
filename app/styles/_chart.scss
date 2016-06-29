@@ -14,15 +14,13 @@
 
 .link {
   fill: none;
-  stroke: #ccc;
+  stroke: $gray;
   stroke-width: 1.5px;
 }
 
 .node .portrait {
-  //opacity: 0.5;
-}
-.node.alive .portrait {
-  opacity: 1;
+	stroke: $gray;
+  	stroke-width: 1px;
 }
 
 .node .partner.no-partner {
@@ -32,7 +30,7 @@
 }
 
 .node .heart {
-	stroke: #c3c3c3;
+	stroke: $gray;
 	fill: #efefef;
 	stroke-width: 4px;
 }

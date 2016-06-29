@@ -21,6 +21,10 @@ var svg = d3.select("#chart").append("svg")
   .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+// Allows us to make circled images
+var defs = svg.insert("svg:defs")
+  .attr("id", "defs");
+
 var yearScale = d3.scale.linear()
     .range([0, width]);
 
@@ -86,6 +90,7 @@ function update(source) {
 
     var nodeSize = 20;
     var enlargedNodeSize = nodeSize * 4; // used on hover
+    var textIndent = 15; // distance between portrait and text
 
     // Partner node
     var partnerNodeSize = 10;
@@ -106,13 +111,65 @@ function update(source) {
       .attr("transform", "translate("+[- partnerNodeSize / 2,- partnerNodeSize / 2]+"), scale(0.3)");
 
     partnerGroup.append("text")
-      .attr("x", function(d,i) { return d.depth == 0 ? -10 : 10; })
+      .attr("x", function(d,i) { return d.depth == 0 ? -textIndent : textIndent; })
       .attr("dy", ".35em")
       .attr("text-anchor", function(d,i) { return d.depth == 0 ? "end" : "start"; })
       .attr("class", "name partner")
       .text(function(d) { return d["Partner"]; })
 
-    nodeEnter.append("image")
+    nodeEnter.append("text")
+        //.attr("x", function(d) { return d.children || d._children ? -textIndent : textIndent; })
+        .attr("x", function(d,i) { return d.depth == 0 ? -textIndent : textIndent; })
+        .attr("dy", ".35em")
+        .attr("text-anchor", function(d,i) { return d.depth == 0 ? "end" : "start"; })
+        //.attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
+        .attr("class", "name person")
+        .text(function(d) { 
+        	return d["Person"] + " ("  + d["Födelseår"] + ")"; 
+        })
+        .style("fill-opacity", 1e-6);
+
+    var def = defs.selectAll("pattern")
+      .data(nodes, function(d) { return d.id || (d.id = ++i); });
+    
+    var defEnter = def.enter()
+      .append("pattern")
+      .attr("id", function(d,i) { return "portrait-" + i })
+      .attr("patternUnits", "userSpaceOnUse")
+      .attr("x", nodeSize / 2)
+      .attr("y", nodeSize / 2)
+      .attr("height", nodeSize)
+      .attr("width", nodeSize);
+
+    defEnter.append("image")
+      .attr("height", nodeSize)
+      .attr("width", nodeSize)
+      .attr("x", 0)
+      .attr("y", 0)
+      .attr("xlink:href", function(d) {
+        if (d["ImageUrl"] == "") {
+          return "images/placeholder.png";
+        }
+        else {
+          //return "images/placeholder.png";
+          return d["ImageUrl"];
+        }
+      })
+
+    defExit = def.exit()
+      .remove();
+
+    nodeEnter.append("circle")
+      .attr("x", - nodeSize / 2)
+      .attr("y", - nodeSize / 2)
+      .attr("r", nodeSize / 2)
+      .attr("class", "portrait")
+      .style("fill", function(d,i) { 
+        return "url(#portrait-" + i + ")"
+      });
+
+
+    /*nodeEnter.append("image")
       .attr("xlink:href", function(d) {
         if (d["ImageUrl"] == "") {
           return "images/placeholder.png";
@@ -126,19 +183,7 @@ function update(source) {
       .attr("y", - nodeSize / 2)
       .attr("width", nodeSize)
       .attr("height", nodeSize)
-      .attr("class", "portrait");
-
-    nodeEnter.append("text")
-        //.attr("x", function(d) { return d.children || d._children ? -10 : 10; })
-        .attr("x", function(d,i) { return d.depth == 0 ? -10 : 10; })
-        .attr("dy", ".35em")
-        .attr("text-anchor", function(d,i) { return d.depth == 0 ? "end" : "start"; })
-        //.attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
-        .attr("class", "name person")
-        .text(function(d) { 
-        	return d["Person"] + " ("  + d["Födelseår"] + ")"; 
-        })
-        .style("fill-opacity", 1e-6);
+      .attr("class", "portrait");*/
 
     // Inivisible area used for interactions
     var clickableWidth = 140;
@@ -156,28 +201,57 @@ function update(source) {
 
     clickableArea
       .on("click", click)
-      .on("mouseover", function(d) {
+      .on("mouseover", function(d,i) {
         // Enlarge nodes with portraits
         if (d.hasPortrait) {
+          // Resize circle
           d3.select(this.parentNode)
             .select(".portrait")
             .transition()
             .duration(200)
-            .attr("width", enlargedNodeSize)
-            .attr("height", enlargedNodeSize)
+            .attr("r", enlargedNodeSize / 2)
             .attr("x", -enlargedNodeSize / 2)
             .attr("y", -enlargedNodeSize / 2);
+
+          d3.select("#portrait-" + i)
+            .transition()
+            .duration(200)
+            .attr("x", enlargedNodeSize / 2)
+            .attr("y", enlargedNodeSize / 2)
+            .attr("width", enlargedNodeSize)
+            .attr("height", enlargedNodeSize);
+
+          d3.select("#portrait-" + i).select("image")
+            .transition()
+            .duration(200)
+            .attr("width", enlargedNodeSize)
+            .attr("height", enlargedNodeSize);
         }
       })
-      .on("mouseout", function(d) {
+      .on("mouseout", function(d,i) {
         d3.select(this.parentNode)
           .select(".portrait")
           .transition()
           .duration(200)
-          .attr("width", nodeSize)
-          .attr("height", nodeSize)
+          .attr("r", nodeSize / 2)
           .attr("x", -nodeSize / 2)
           .attr("y", -nodeSize / 2);
+
+        // Pattern
+        d3.select("#portrait-" + i)
+          .transition()
+          .duration(200)
+          .attr("x", nodeSize / 2)
+          .attr("y", nodeSize / 2)
+          .attr("width", nodeSize)
+          .attr("height", nodeSize)
+
+        // Pattern > image
+        d3.select("#portrait-" + i).select("image")
+          .transition()
+          .duration(200)
+          .attr("width", nodeSize)
+          .attr("height", nodeSize)
       });
 
     // Transition nodes to their new position.
