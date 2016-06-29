@@ -134,7 +134,7 @@ function update(source) {
     
     var defEnter = def.enter()
       .append("pattern")
-      .attr("id", function(d,i) { return "portrait-" + i })
+      .attr("id", function(d) { return "portrait-" + d.id })
       .attr("patternUnits", "userSpaceOnUse")
       .attr("x", nodeSize / 2)
       .attr("y", nodeSize / 2)
@@ -164,8 +164,8 @@ function update(source) {
       .attr("y", - nodeSize / 2)
       .attr("r", nodeSize / 2)
       .attr("class", "portrait")
-      .style("fill", function(d,i) { 
-        return "url(#portrait-" + i + ")"
+      .style("fill", function(d) { 
+        return "url(#portrait-" + d.id + ")"
       });
 
 
@@ -201,7 +201,7 @@ function update(source) {
 
     clickableArea
       .on("click", click)
-      .on("mouseover", function(d,i) {
+      .on("mouseover", function(d) {
         // Enlarge nodes with portraits
         if (d.hasPortrait) {
           // Resize circle
@@ -213,7 +213,7 @@ function update(source) {
             .attr("x", -enlargedNodeSize / 2)
             .attr("y", -enlargedNodeSize / 2);
 
-          d3.select("#portrait-" + i)
+          d3.select("#portrait-" + d.id)
             .transition()
             .duration(200)
             .attr("x", enlargedNodeSize / 2)
@@ -221,14 +221,14 @@ function update(source) {
             .attr("width", enlargedNodeSize)
             .attr("height", enlargedNodeSize);
 
-          d3.select("#portrait-" + i).select("image")
+          d3.select("#portrait-" + d.id).select("image")
             .transition()
             .duration(200)
             .attr("width", enlargedNodeSize)
             .attr("height", enlargedNodeSize);
         }
       })
-      .on("mouseout", function(d,i) {
+      .on("mouseout", function(d) {
         d3.select(this.parentNode)
           .select(".portrait")
           .transition()
@@ -238,7 +238,7 @@ function update(source) {
           .attr("y", -nodeSize / 2);
 
         // Pattern
-        d3.select("#portrait-" + i)
+        d3.select("#portrait-" + d.id)
           .transition()
           .duration(200)
           .attr("x", nodeSize / 2)
@@ -247,7 +247,7 @@ function update(source) {
           .attr("height", nodeSize)
 
         // Pattern > image
-        d3.select("#portrait-" + i).select("image")
+        d3.select("#portrait-" + d.id).select("image")
           .transition()
           .duration(200)
           .attr("width", nodeSize)
