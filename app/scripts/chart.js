@@ -77,25 +77,15 @@ function update(source) {
     var nodeEnter = node.enter().append("g")
         .attr("class", "node")
         .classed("alive", function(d) { return d["Nu levande"]; })
-        .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
-        .on("click", click);
+        .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; });
+        //.on("click", click);
 
     nodeEnter.append("circle")
         .attr("r", 1e-6)
         .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
 
     var nodeSize = 20;
-
-    /*nodeEnter.append("rect")
-	     .attr("x", - nodeSize / 2)
-      	.attr("y", - nodeSize / 2)
-        .attr("width", nodeSize)
-        .attr("height", nodeSize)
-        .attr("fill", "#fff")
-        .attr("stroke", "red")
-        .attr("stroke-width", function(d) {
-        	return d["Lingarödelägare"] ? "3px" : "0";
-        });*/
+    var enlargedNodeSize = nodeSize * 4; // used on hover
 
     // Partner node
     var partnerNodeSize = 10;
@@ -123,8 +113,8 @@ function update(source) {
           return "images/placeholder.png";
         }
         else {
-          return "images/placeholder.png";
-          //return d["ImageUrl"];
+          //return "images/placeholder.png";
+          return d["ImageUrl"];
         }
       })
       .attr("x", - nodeSize / 2)
@@ -144,6 +134,46 @@ function update(source) {
         	return d["Person"] + " ("  + d["Födelseår"] + ")"; 
         })
         .style("fill-opacity", 1e-6);
+
+    // Inivisible area used for interactions
+    var clickableWidth = 140;
+    var clickableArea = nodeEnter.append("rect")
+      .attr("class", "clickable-area")
+      .attr("width", clickableWidth)
+      .attr("y", -nodeSize / 2)
+      .attr("x", function(d,i) { 
+          return d.depth == 0 ? -clickableWidth + nodeSize / 2 : - nodeSize / 2; 
+      })
+      .attr("height", nodeSize)
+      .attr("fill", "#fff")
+      .attr("opacity", 1e-6)
+      .attr("stroke", "none")
+
+    clickableArea
+      .on("click", click)
+      .on("mouseover", function(d) {
+        // Enlarge nodes with portraits
+        if (d.hasPortrait) {
+          d3.select(this.parentNode)
+            .select(".portrait")
+            .transition()
+            .duration(200)
+            .attr("width", enlargedNodeSize)
+            .attr("height", enlargedNodeSize)
+            .attr("x", -enlargedNodeSize / 2)
+            .attr("y", -enlargedNodeSize / 2);
+        }
+      })
+      .on("mouseout", function(d) {
+        d3.select(this.parentNode)
+          .select(".portrait")
+          .transition()
+          .duration(200)
+          .attr("width", nodeSize)
+          .attr("height", nodeSize)
+          .attr("x", -nodeSize / 2)
+          .attr("y", -nodeSize / 2);
+      });
 
     // Transition nodes to their new position.
     var nodeUpdate = node.transition()

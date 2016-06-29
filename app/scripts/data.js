@@ -34,6 +34,7 @@ function prepareData(nodeData, edgeData) {
 	  d["Lingarödelägare"] = d["Lingarödelägare"] == "TRUE";
 	  d["Nu levande"] = d["Nu levande"] == "TRUE";
 	  d["hasPartner"] = d["Partner"] !== "";
+	  d["hasPortrait"] = d["ImageUrl"] !== "";
 	})
 
 	persons = nodeData.reduce(function(map, node) {
