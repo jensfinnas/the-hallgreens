@@ -7,3 +7,9 @@ $icon-font-path: "../bower_components/bootstrap-sass-official/assets/fonts/boots
 
 @import 'chart';
 
+
+body {
+  background-color: $background-color; 
+  color: $text-color;
+}
+

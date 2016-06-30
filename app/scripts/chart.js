@@ -1,7 +1,7 @@
 
 
 
-var margin = {top: 20, right: 120, bottom: 20, left: 120},
+var margin = {top: 20, right: 120, bottom: 20, left: 150},
     width = 1160 - margin.right - margin.left,
     height = 800 - margin.top - margin.bottom;
 
@@ -28,11 +28,18 @@ var defs = svg.insert("svg:defs")
 var yearScale = d3.scale.linear()
     .range([0, width]);
 
+
+
 var nameColumn = "Person";
 var parentIdColumn = "Förälderns id";
 var childIdColumn = "Barnets id";
 var personIdColum = "Id";
 var persons = {};
+
+var nodeSize = 20;
+var textIndent = 15; // distance between portrait and text
+var partnerNodeSize = 10;
+
 
 function initChart(nodeData, edgeData) {
   var years = nodeData
@@ -40,6 +47,39 @@ function initChart(nodeData, edgeData) {
     .filter(function(d) { return d > 0; });
 
   yearScale.domain([d3.min(years), d3.max(years)])
+
+  // Draw timeline in background
+  var yearInterval = 10;
+  var minYear = Math.floor(d3.min(years) / yearInterval) * yearInterval;
+  var maxYear = Math.floor(d3.max(years) / yearInterval) * yearInterval;
+  /*var nIntervals = (maxYear - minYear) / yearInterval;
+  var yearIntervals = Array.apply(null, Array(nIntervals)).map(function (_, i) {return minYear + i * yearInterval;});
+  
+  var timeline = svg.selectAll(".tick")
+    .data(yearIntervals)
+    .enter()
+    .append("g")
+    .attr("transform", function(d) {
+      return "translate("+[yearScale(d),0]+")"; 
+    });
+
+  timeline.append("text")
+    .text(function(d) { return d })*/
+
+  var xAxis = d3.svg.axis()
+    .scale(yearScale)
+    .orient("top")
+    .ticks(20)
+    .tickFormat(function(d) { return d; });
+    //.tickValues(d3.range(minYear, maxYear, yearInterval))
+
+  svg.append("g")
+    .attr("class", "axis")
+    .call(xAxis);
+
+  svg.select(".domain")
+    .attr("transform", "translate(0,-3)");
+
 
   root = nodeData[0];
   root.children = treeify(edgeData, parentIdColumn, childIdColumn);
@@ -88,12 +128,7 @@ function update(source) {
         .attr("r", 1e-6)
         .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
 
-    var nodeSize = 20;
-    var enlargedNodeSize = nodeSize * 4; // used on hover
-    var textIndent = 15; // distance between portrait and text
-
     // Partner node
-    var partnerNodeSize = 10;
     var partnerGroup = nodeEnter.append("g")
       .attr("class", "partner")
       .classed("no-partner", function(d) { return !d["hasPartner"]; })
@@ -204,54 +239,11 @@ function update(source) {
       .on("mouseover", function(d) {
         // Enlarge nodes with portraits
         if (d.hasPortrait) {
-          // Resize circle
-          d3.select(this.parentNode)
-            .select(".portrait")
-            .transition()
-            .duration(200)
-            .attr("r", enlargedNodeSize / 2)
-            .attr("x", -enlargedNodeSize / 2)
-            .attr("y", -enlargedNodeSize / 2);
-
-          d3.select("#portrait-" + d.id)
-            .transition()
-            .duration(200)
-            .attr("x", enlargedNodeSize / 2)
-            .attr("y", enlargedNodeSize / 2)
-            .attr("width", enlargedNodeSize)
-            .attr("height", enlargedNodeSize);
-
-          d3.select("#portrait-" + d.id).select("image")
-            .transition()
-            .duration(200)
-            .attr("width", enlargedNodeSize)
-            .attr("height", enlargedNodeSize);
+          scaleNode(this.parentNode, d, 3);
         }
       })
       .on("mouseout", function(d) {
-        d3.select(this.parentNode)
-          .select(".portrait")
-          .transition()
-          .duration(200)
-          .attr("r", nodeSize / 2)
-          .attr("x", -nodeSize / 2)
-          .attr("y", -nodeSize / 2);
-
-        // Pattern
-        d3.select("#portrait-" + d.id)
-          .transition()
-          .duration(200)
-          .attr("x", nodeSize / 2)
-          .attr("y", nodeSize / 2)
-          .attr("width", nodeSize)
-          .attr("height", nodeSize)
-
-        // Pattern > image
-        d3.select("#portrait-" + d.id).select("image")
-          .transition()
-          .duration(200)
-          .attr("width", nodeSize)
-          .attr("height", nodeSize)
+        scaleNode(this.parentNode, d, 1);
       });
 
     // Transition nodes to their new position.
@@ -323,4 +315,31 @@ function click(d) {
     d._children = null;
   }
   update(d);
+}
+
+function scaleNode(node, d, factor) {
+  var newNodeSize = nodeSize * factor;
+
+  // Resize circle
+  d3.select(node)
+    .select(".portrait")
+    .transition()
+    .duration(200)
+    .attr("r", newNodeSize / 2)
+    .attr("x", -newNodeSize / 2)
+    .attr("y", -newNodeSize / 2);
+
+  d3.select("#portrait-" + d.id)
+    .transition()
+    .duration(200)
+    .attr("x", newNodeSize / 2)
+    .attr("y", newNodeSize / 2)
+    .attr("width", newNodeSize)
+    .attr("height", newNodeSize);
+
+  d3.select("#portrait-" + d.id).select("image")
+    .transition()
+    .duration(200)
+    .attr("width", newNodeSize)
+    .attr("height", newNodeSize);
 }

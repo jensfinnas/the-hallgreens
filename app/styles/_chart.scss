@@ -1,3 +1,8 @@
+#chart {
+	text {
+		fill: $text-color;
+	}
+}
 .clickable-area {
   cursor: pointer;
 }
@@ -14,12 +19,12 @@
 
 .link {
   fill: none;
-  stroke: $gray;
+  stroke: $theme-color;
   stroke-width: 1.5px;
 }
 
 .node .portrait {
-	stroke: $gray;
+	stroke: $theme-color;
   	stroke-width: 1px;
 }
 
@@ -30,7 +35,20 @@
 }
 
 .node .heart {
-	stroke: $gray;
+	stroke: $theme-color;
 	fill: #efefef;
 	stroke-width: 4px;
+}
+
+// AXES
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #fff;
+    shape-rendering: crispEdges;
+}
+
+.axis text {
+    font-family: sans-serif;
+    font-size: 10px;
 }
